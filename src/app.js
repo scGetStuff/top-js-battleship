@@ -10,7 +10,8 @@ function doStuff() {
     const ship1 = ship(2);
     const ship2 = ship(4);
 
-    cl(ship1.hit == ship2.hit);
+    cl(ship1.hit === ship2.hit);
+    cl(ship1.length);
 }
 
 doStuff();
