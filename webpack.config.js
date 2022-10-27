@@ -1,9 +1,12 @@
 "use strict";
 
-const path = require("path");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
+import path from "path";
+import HtmlWebpackPlugin from "html-webpack-plugin";
+const __dirname = path.resolve(path.dirname(""));
+// const path = require("path");
+// const HtmlWebpackPlugin = require("html-webpack-plugin");
 
-module.exports = {
+export default {
     entry: "./src/app.js",
     mode: "development",
     devtool: "eval-source-map",

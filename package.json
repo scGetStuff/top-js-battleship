@@ -3,9 +3,11 @@
     "version": "1.0.0",
     "description": "The Odin Project, Full Stack JavaScript Path, JavaScript, Testing JavaScript, Project: Battleship",
     "private": true,
+    "type": "module",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "build": "webpack --mode production",
+        "dev": "webpack --mode development",
         "server": "webpack serve --mode development",
         "watch": "webpack --watch --mode development"
     },
