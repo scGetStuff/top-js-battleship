@@ -1,24 +1,20 @@
 "use strict";
 
 const proto = {
-    drive() {
-        console.log("Vroom!");
-    },
-
     hit() {
-        hits++;
+        this.hits++;
     },
 
     isSunk() {
-        return hits >= length;
+        return this.hits >= this.length;
     },
 };
 
-function ship(len) {
+function shipFactory(len) {
     let obj = Object.create(proto);
     obj.hits = 0;
     obj.length = len;
     return obj;
 }
 
-export { ship };
+export { shipFactory };
