@@ -26,7 +26,7 @@ const proto = {
 // the ief closure thing with accesor methods on the prototype
 // just going to continue doing it wrong for now
 function factory(type) {
-    let obj = Object.create(proto);
+    const obj = Object.create(proto);
     obj.hits = 0;
     obj.type = type;
     return obj;

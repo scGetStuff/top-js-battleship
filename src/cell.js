@@ -14,11 +14,21 @@ const proto = {
 };
 
 function factory(x, y, type = types.WATER) {
-    let obj = Object.create(proto);
+    const obj = Object.create(proto);
     obj.x = x;
     obj.y = y;
     obj.type = type;
+    // TODO: kind of shitty
+    // need some way to bind cells on the players ship grid to the ship object when they are placed
+    obj.shipRef = null;
     return obj;
 }
 
 export { factory, types };
+
+function doStuff() {
+    const cell = factory(4, 5);
+    console.log(cell.toString());
+}
+
+// doStuff();

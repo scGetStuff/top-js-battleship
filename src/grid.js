@@ -8,27 +8,28 @@ const proto = {
     toString() {
         const out = [];
         let line;
-        for (let i = SIZE - 1; i >= 0; i--) {
+
+        for (let r = 0; r < SIZE; r++) {
             line = "";
-            for (let j = 0; j < SIZE; j++) {
-                line += this.cells[i][j] + "  ";
+            for (let c = 0; c < SIZE; c++) {
+                line += this.cells[r][c] + "  ";
             }
             out.push(line.trimEnd());
         }
+
         return out.join("\n");
     },
 };
 
 // 2D array of water cells
 function factory() {
-    let obj = Object.create(proto);
+    const obj = Object.create(proto);
 
     const cells = new Array(SIZE);
-    for (let i = 0; i < SIZE; i++) cells[i] = new Array(SIZE);
-
-    for (let i = 0; i < SIZE; i++)
-        for (let j = 0; j < SIZE; j++) cells[i][j] = Cell.factory(i, j);
-
+    for (let r = 0; r < SIZE; r++) {
+        cells[r] = new Array(SIZE);
+        for (let c = 0; c < SIZE; c++) cells[r][c] = Cell.factory(c, r);
+    }
     obj.cells = cells;
 
     return obj;
@@ -38,8 +39,7 @@ export { factory };
 
 function doStuff() {
     const grid = factory();
-    grid.cells[5][5].type = Cell.types.HIT;
-
+    grid.cells[4][5].type = Cell.types.HIT;
     console.log(grid.toString());
 }
 
