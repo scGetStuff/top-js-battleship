@@ -1,19 +1,16 @@
 "use strict";
 
-import { shipFactory } from "./ship.js";
+import * as Board from "./board.js";
+import * as Grid from "./grid.js";
+import * as Cell from "./cell.js";
+import * as Ship from "./ship.js";
 
 const cl = console.log;
 
 function doStuff() {
     console.clear();
 
-    const ship1 = shipFactory(2);
-    const ship2 = shipFactory(4);
-
-    cl(ship1.hit === ship2.hit);
-    cl(ship1.length);
-
-    ship1.hit();
+    const board = Board.factory();
     
 }
 

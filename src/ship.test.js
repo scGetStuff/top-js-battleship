@@ -1,15 +1,16 @@
 "use strict";
 
-import { shipFactory } from "./ship.js";
+import * as Ship from "./ship.js";
 
-test("creation with size 2", () => {
-    const ship = shipFactory(2);
-    expect(ship.length).toBe(2);
+test("test toString()", () => {
+    const ship = Ship.factory(Ship.types.BATTLESHIP);
+    expect(typeof ship.toString()).toEqual('string');
+    expect(`${ship}`).toEqual('Battleship 4 - 0');
 });
 
 test("test hit()", () => {
-    const ship = shipFactory(2);
-    const ship2 = shipFactory(4);
+    const ship = Ship.factory(Ship.types.PATROLBOAT);
+    const ship2 = Ship.factory(Ship.types.BATTLESHIP);
     ship.hit();
     ship2.hit();
     ship2.hit();
@@ -19,8 +20,8 @@ test("test hit()", () => {
 });
 
 test("test isSunk()", () => {
-    const ship = shipFactory(2);
-    const ship2 = shipFactory(4);
+    const ship = Ship.factory(Ship.types.PATROLBOAT);
+    const ship2 = Ship.factory(Ship.types.BATTLESHIP);
     ship.hit();
     ship2.hit();
     ship2.hit();
