@@ -7,8 +7,8 @@ import * as Ship from "./ship.js";
 // TODO: dependent on board orientation, currently folowing wiki
 // 0,0 upper left 9,9 lower right, so N/S has to be backwards
 const directions = {
-    NORTH: { x: 0, y: -1 },
-    SOUTH: { x: 0, y: 1 },
+    NORTH: { x: 0, y: 1 },
+    SOUTH: { x: 0, y: -1 },
     WEST: { x: -1, y: 0 },
     EAST: { x: 1, y: 0 },
 };
@@ -85,11 +85,11 @@ export { factory };
 function doStuff() {
     const board = factory();
 
-    board.placeShip(Ship.types.BATTLESHIP, { x: 4, y: 5 }, directions.EAST);
+    board.placeShip(Ship.types.BATTLESHIP, { x: 4, y: 7 }, directions.NORTH);
 
     const { ship, arrayOfPoints } = board.ships.get(Ship.types.BATTLESHIP);
     console.log(arrayOfPoints);
     console.log(board.gridShips.toString());
 }
 
-doStuff();
+// doStuff();
