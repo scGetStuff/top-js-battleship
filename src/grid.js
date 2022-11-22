@@ -9,7 +9,7 @@ const proto = {
         const out = [];
         let line;
 
-        for (let r = 0; r < SIZE; r++) {
+        for (let r = SIZE-1; r >= 0; r--) {
             line = "";
             for (let c = 0; c < SIZE; c++) {
                 line += this.cells[r][c] + "  ";
