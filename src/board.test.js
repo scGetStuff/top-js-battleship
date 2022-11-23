@@ -11,13 +11,26 @@ test("Create board", () => {
     expect(board.ships).toBeDefined();
 });
 
-// test("test placeShip()", () => {
-//     const board = Board.factory();
-//     expect(board.placeShip()).toEqual(Cell.types.MISS);
-// });
+test("test placeShip()", () => {
+    const board = Board.factory();
+    
+    expect(isWater()).toBe(true);
+    board.placeShip(
+        Ship.types.BATTLESHIP,
+        { x: 4, y: 5 },
+        Board.directions.NORTH
+    );
+    expect(isWater()).toBe(false);
+
+    function isWater() {
+        return board.gridShips.cells.every((row) =>
+            row.every((cell) => cell.type === Cell.types.WATER)
+        );
+    }
+});
 
 test("test receiveAttack()", () => {
     const board = Board.factory();
-    expect(board.receiveAttack({ x: 5, y: 5 })).toEqual(Cell.types.MISS);
-    expect(() => board.receiveAttack({ x: 5, y: 5 })).toThrow();
+    expect(board.receiveAttack({ x: 4, y: 5 })).toEqual(Cell.types.MISS);
+    expect(() => board.receiveAttack({ x: 4, y: 5 })).toThrow();
 });
