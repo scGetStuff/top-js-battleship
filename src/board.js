@@ -15,21 +15,27 @@ const directions = {
 
 const proto = {
     receiveAttack(point = { x: 0, y: 0 }) {
-        // TODO: validation, if they repeat an existing shot
-        // don't know how i'll handle this in UI yet, just throw for Jest
-        const targetCell = this.gridShips.cells[point.x][point.y];
+        // TODO: don't know how i'll handle this in UI yet, just throw for Jest
+        // validation, if they repeat an existing shot
+        const targetShot = this.gridShots.cells[point.y][point.x];
         if (
-            targetCell.type === Cell.types.HIT ||
-            targetCell.type === Cell.types.MISS
+            targetShot.type === Cell.types.HIT ||
+            targetShot.type === Cell.types.MISS
         )
             throw new Error(`You already fired at this spot ${point}`);
 
+        // check for a hit
+        targetShot.type = Cell.types.MISS;
+        const targetCell = this.gridShips.cells[point.y][point.x];
         if (targetCell.type === Cell.types.SHIP) {
-            this.ships.get(targetCell.shipRef).hit();
-            return (targetCell.type = Cell.types.HIT);
+            targetShot.type = Cell.types.HIT;
+            const { ship } = this.ships.get(targetCell.shipTypeRef);
+            ship.hit();
+
+            // TODO: probably need a hook here to report sunk ship
         }
 
-        return (targetCell.type = Cell.types.MISS);
+        return targetShot.type;
     },
 
     placeShip(type, tailPoint = { x: 0, y: 0 }, direction) {
@@ -52,11 +58,21 @@ const proto = {
                 y: tailPoint.y + direction.y * i,
             });
 
+        // check for existing ship at cords
+        const isWater = arrayOfPoints.every((point) => {
+            const cell = this.gridShips.cells[point.y][point.x];
+            return cell.type === Cell.types.WATER;
+        });
+        if (!isWater)
+            throw new Error(
+                "placeShip() fail. Cannot place ships on top of others"
+            );
+
         // update grid
         arrayOfPoints.forEach((point) => {
             const cell = this.gridShips.cells[point.y][point.x];
             cell.type = Cell.types.SHIP;
-            cell.shipRef = ship;
+            cell.shipTypeRef = ship.type;
         });
     },
 };
@@ -67,10 +83,12 @@ function factory() {
     // TODO: wiki said ships "may vary depending on the rules", kind of usless
     // defaulting to 1 of each
     obj.ships = new Map();
-
     for (let type in Ship.types) {
-        // I need the propert object, not it's name
+        // I need a referance to the property, not it's name
         type = Ship.types[type];
+        // TODO: i think i want to change arrayOfPoints to arrayOfCells and make it
+        // referances to the gridShips cells that the ship uses on placeShip()
+        // to get rid of Cell.shipTypeRef
         obj.ships.set(type, { ship: Ship.factory(type), arrayOfPoints: [] });
     }
 
@@ -80,16 +98,26 @@ function factory() {
     return obj;
 }
 
-export { factory };
+export { factory, directions };
 
 function doStuff() {
     const board = factory();
 
-    board.placeShip(Ship.types.BATTLESHIP, { x: 4, y: 7 }, directions.NORTH);
+    const isWater = board.gridShips.cells.every((row) =>
+        row.every((cell) => cell.type === Cell.types.WATER)
+    );
+    console.log(isWater);
+
+    board.placeShip(Ship.types.BATTLESHIP, { x: 4, y: 5 }, directions.NORTH);
+    board.placeShip(Ship.types.DESTROYER, { x: 5, y: 5 }, directions.NORTH);
+    board.receiveAttack({ x: 4, y: 5 });
+    // board.receiveAttack({ x: 4, y: 5 });
 
     const { ship, arrayOfPoints } = board.ships.get(Ship.types.BATTLESHIP);
-    console.log(arrayOfPoints);
+    // console.log(arrayOfPoints);
     console.log(board.gridShips.toString());
+    console.log("\n");
+    console.log(board.gridShots.toString());
 }
 
 // doStuff();
