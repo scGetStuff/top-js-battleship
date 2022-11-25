@@ -7,6 +7,7 @@ const types = {
     SUBMARINE: { name: "Submarine", length: 3 },
     PATROLBOAT: { name: "PatrolBoat", length: 2 },
 };
+Object.freeze(types);
 
 const proto = {
     hit() {

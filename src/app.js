@@ -11,7 +11,7 @@ function doStuff() {
     console.clear();
 
     const board = Board.factory();
-    
+    cl(board.toString());
 }
 
 doStuff();

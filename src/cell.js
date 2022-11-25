@@ -6,6 +6,7 @@ const types = {
     SHIP: { name: "S", value: 2 },
     HIT: { name: "H", value: 3 },
 };
+Object.freeze(types);
 
 const proto = {
     toString() {

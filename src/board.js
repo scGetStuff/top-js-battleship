@@ -12,6 +12,7 @@ const directions = {
     WEST: { x: -1, y: 0 },
     EAST: { x: 1, y: 0 },
 };
+Object.freeze(directions);
 
 const proto = {
     receiveAttack(point = { x: 0, y: 0 }) {
@@ -75,10 +76,36 @@ const proto = {
             cell.shipTypeRef = ship.type;
         });
     },
+
+    toString() {
+        let arr = Array.from(this.ships.keys());
+        arr = arr.map((element) => element.name);
+
+        return (
+            `Ships:\n${arr.join("\n")}` +
+            `\n\nShot Grid:\n${this.gridShots.toString()}` +
+            `\n\nShip Grid:\n${this.gridShips.toString()}\n`
+        );
+    },
+
+    // TODO: may not want to do this, kind of just testing
+    defaultPlaceShips() {
+        let i = 0;
+        for (let type in Ship.types) {
+            type = Ship.types[type];
+            this.placeShip(type, { x: i++, y: 1 }, directions.NORTH);
+        }
+    },
 };
 
 function factory() {
     const obj = Object.create(proto);
+
+    // TODO: i'm using this wrong in receiveAttack()
+    // not sure what shots is suposed to record; i think it should be my shots
+    // against oponent and I should have hits and miss on from receiveAttack go to ship grid
+    obj.gridShips = Grid.factory();
+    obj.gridShots = Grid.factory();
 
     // TODO: wiki said ships "may vary depending on the rules", kind of usless
     // defaulting to 1 of each
@@ -92,9 +119,6 @@ function factory() {
         obj.ships.set(type, { ship: Ship.factory(type), arrayOfPoints: [] });
     }
 
-    obj.gridShips = Grid.factory();
-    obj.gridShots = Grid.factory();
-
     return obj;
 }
 
@@ -102,6 +126,10 @@ export { factory, directions };
 
 function doStuff() {
     const board = factory();
+
+    board.defaultPlaceShips();
+    console.log(board.toString());
+    return;
 
     const isWater = board.gridShips.cells.every((row) =>
         row.every((cell) => cell.type === Cell.types.WATER)
@@ -120,4 +148,4 @@ function doStuff() {
     console.log(board.gridShots.toString());
 }
 
-// doStuff();
+doStuff();
