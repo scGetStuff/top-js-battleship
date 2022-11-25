@@ -1,6 +1,6 @@
 "use strict";
 
-import * as Cell from "./cell.js";
+import * as Cell from "../cell.js";
 
 test("test toString()", () => {
     const cell = Cell.factory(3, 4);

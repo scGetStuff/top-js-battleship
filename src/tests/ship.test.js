@@ -1,6 +1,6 @@
 "use strict";
 
-import * as Ship from "./ship.js";
+import * as Ship from "../ship.js";
 
 test("test toString()", () => {
     const ship = Ship.factory(Ship.types.BATTLESHIP);

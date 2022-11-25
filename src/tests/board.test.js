@@ -1,8 +1,8 @@
 "use strict";
 
-import * as Board from "./board.js";
-import * as Cell from "./cell.js";
-import * as Ship from "./ship.js";
+import * as Board from "../board.js";
+import * as Cell from "../cell.js";
+import * as Ship from "../ship.js";
 
 test("Create board", () => {
     const board = Board.factory();
@@ -11,9 +11,9 @@ test("Create board", () => {
     expect(board.ships).toBeDefined();
 });
 
-test("test placeShip()", () => {
+test("test placeShip() on empty board", () => {
     const board = Board.factory();
-    
+
     expect(isWater()).toBe(true);
     board.placeShip(
         Ship.types.BATTLESHIP,
@@ -27,6 +27,27 @@ test("test placeShip()", () => {
             row.every((cell) => cell.type === Cell.types.WATER)
         );
     }
+});
+
+test("test placeShip() out of bounds", () => {
+    const board = Board.factory();
+
+    expect(() =>
+        board.placeShip(
+            Ship.types.BATTLESHIP,
+            { x: 1, y: 1 },
+            Board.directions.SOUTH
+        )
+    ).toThrow();
+
+    expect(() =>
+        board.placeShip(
+            Ship.types.BATTLESHIP,
+            { x: 1, y: 1 },
+            Board.directions.WEST
+        )
+    ).toThrow();
+
 });
 
 test("test receiveAttack()", () => {

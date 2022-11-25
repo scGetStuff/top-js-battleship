@@ -1,6 +1,6 @@
 "use strict";
 
-import * as Grid from "./grid.js";
+import * as Grid from "../grid.js";
 
 test("test toString()", () => {
     const grid = Grid.factory();
