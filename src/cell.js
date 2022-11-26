@@ -19,9 +19,6 @@ function factory(x, y, type = types.WATER) {
     obj.x = x;
     obj.y = y;
     obj.type = type;
-    // TODO: kind of shitty
-    // need some way to bind cells on the players ship grid to the ship object when they are placed
-    obj.shipTypeRef = null;
     return obj;
 }
 
