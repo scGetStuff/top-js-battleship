@@ -30,7 +30,7 @@ const proto = {
         const targetCell = this.gridShips.cells[point.y][point.x];
         if (targetCell.type === Cell.types.SHIP) {
             targetShot.type = Cell.types.HIT;
-            const { ship } = this.ships.get(targetCell.shipTypeRef);
+            const { ship } = this.ships.get(getShipType(this.ships, point));
             ship.hit();
 
             // TODO: probably need a hook here to report sunk ship
@@ -39,8 +39,17 @@ const proto = {
         return targetShot.type;
     },
 
-    placeShip(type, tailPoint = { x: 0, y: 0 }, direction) {
+    // TODO: something needs to be refactored
+    // there are a bunch of steps required to place a ship, but 
+    // none of it is generic or repated code
+    // a bunch of inner functions is realy no different from block comments
+    placeShip(
+        type = Ship.types.BATTLESHIP,
+        tailPoint = { x: 0, y: 0 },
+        direction = directions.NORTH
+    ) {
         const { ship, arrayOfPoints } = this.ships.get(type);
+        const newPoints = [];
 
         // prevent out of bounds
         const xEnd = tailPoint.x + direction.x * (ship.type.length - 1);
@@ -48,19 +57,27 @@ const proto = {
         if (xEnd < 0 || xEnd > 9 || yEnd < 0 || yEnd > 9)
             throw new Error("placeShip() fail. Ship would be out of bounds");
 
-        // TODO: incase i need to handle repositioning
-        if (arrayOfPoints.length > 0) arrayOfPoints = [];
-
         // build list of cordinats for the ship
-        arrayOfPoints.push({ x: tailPoint.x, y: tailPoint.y });
+        newPoints.push({ x: tailPoint.x, y: tailPoint.y });
         for (let i = 1; i < ship.type.length; i++)
-            arrayOfPoints.push({
+            newPoints.push({
                 x: tailPoint.x + direction.x * i,
                 y: tailPoint.y + direction.y * i,
             });
 
+        // repositioning an existing ship
+        // order of code is important
+        // need to clear current location so a ship can reposition over itself
+        if (arrayOfPoints.length > 0) {
+            arrayOfPoints.forEach((point) => {
+                const cell = this.gridShips.cells[point.y][point.x];
+                cell.type = Cell.types.WATER;
+            });
+            arrayOfPoints.length = 0;
+        }
+
         // check for existing ship at cords
-        const isWater = arrayOfPoints.every((point) => {
+        const isWater = newPoints.every((point) => {
             const cell = this.gridShips.cells[point.y][point.x];
             return cell.type === Cell.types.WATER;
         });
@@ -69,11 +86,13 @@ const proto = {
                 "placeShip() fail. Cannot place ships on top of others"
             );
 
-        // update grid
+        // copy points into the ships map
+        newPoints.forEach((point) => arrayOfPoints.push(point));
+
+        // update grid with the ship
         arrayOfPoints.forEach((point) => {
             const cell = this.gridShips.cells[point.y][point.x];
             cell.type = Cell.types.SHIP;
-            cell.shipTypeRef = ship.type;
         });
     },
 
@@ -88,7 +107,7 @@ const proto = {
         );
     },
 
-    // TODO: may not want to do this, kind of just testing
+    // TODO: may not want to this, kind of just for testing
     defaultPlaceShips() {
         let i = 0;
         for (let type in Ship.types) {
@@ -109,27 +128,36 @@ function factory() {
 
     // TODO: wiki said ships "may vary depending on the rules", kind of usless
     // defaulting to 1 of each
+    // TODO: why am i using Map(), type is key and part of value, should probably use Set
     obj.ships = new Map();
     for (let type in Ship.types) {
         // I need a referance to the property, not it's name
         type = Ship.types[type];
-        // TODO: i think i want to change arrayOfPoints to arrayOfCells and make it
-        // referances to the gridShips cells that the ship uses on placeShip()
-        // to get rid of Cell.shipTypeRef
         obj.ships.set(type, { ship: Ship.factory(type), arrayOfPoints: [] });
     }
 
     return obj;
 }
 
+// TODO: i do hate this, but i hated Cell.shipTypeRef more
+// need to know what ship is on a cell when firing a shot
+// and when repositioning
+// upgrade from hack inapropriate referance to stupid search
+function getShipType(ships = new Map(), point = { x: 0, y: 0 }) {
+    for (const [key, value] of ships) {
+        const { arrayOfPoints } = value;
+        const isMatch = arrayOfPoints.some(
+            (shipPoint) => shipPoint.x === point.x && shipPoint.y === point.y
+        );
+        if (isMatch) return key;
+    }
+    return null;
+}
+
 export { factory, directions };
 
 function doStuff() {
     const board = factory();
-
-    board.defaultPlaceShips();
-    console.log(board.toString());
-    return;
 
     const isWater = board.gridShips.cells.every((row) =>
         row.every((cell) => cell.type === Cell.types.WATER)
@@ -148,4 +176,4 @@ function doStuff() {
     console.log(board.gridShots.toString());
 }
 
-doStuff();
+// doStuff();

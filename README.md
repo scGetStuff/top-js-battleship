@@ -15,3 +15,5 @@ TODO
 - game loop
 - add ability to place ships; start with static
 - UI
+
+The default parameters all over the place are because I haven't switched to typescript yet, I do it to kind of define types for parameters
