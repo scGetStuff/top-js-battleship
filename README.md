@@ -9,7 +9,6 @@ The Odin Project, Full Stack JavaScript Path, JavaScript, Testing JavaScript, Pr
 
 TODO
 - I probably don't have enough tests, I am not getting into TDD unless somebody id paying me
-- fix shot recording; add hit/miss to ship grid; add code to record my attacks on shot grid
 - board needs report method to return if all ships sunk; for game loop to call
 - player object; will be random AI first
 - game loop

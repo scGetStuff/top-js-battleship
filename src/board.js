@@ -4,8 +4,10 @@ import * as Grid from "./grid.js";
 import * as Cell from "./cell.js";
 import * as Ship from "./ship.js";
 
-// TODO: dependent on board orientation, currently folowing wiki
-// 0,0 upper left 9,9 lower right, so N/S has to be backwards
+// TODO: dependent on board orientation
+// need to change to folowing wiki 0,0 upper left 9,9 lower right
+// i realy don't want bacwards cordinats, need to play with it
+// change grid toString()
 const directions = {
     NORTH: { x: 0, y: 1 },
     SOUTH: { x: 0, y: -1 },
@@ -15,76 +17,91 @@ const directions = {
 Object.freeze(directions);
 
 const proto = {
+    //fix shot recording; add hit/miss to ship grid; add code to record my attacks on shot grid
     receiveAttack(point = { x: 0, y: 0 }) {
-        // TODO: don't know how i'll handle this in UI yet, just throw for Jest
-        // validation, if they repeat an existing shot
-        const targetShot = this.gridShots.cells[point.y][point.x];
-        if (
-            targetShot.type === Cell.types.HIT ||
-            targetShot.type === Cell.types.MISS
-        )
+        const targetCell = this.gridShips.cells[point.y][point.x];
+
+        // if they repeat an existing shot
+        const isBadShot =
+            targetCell.type === Cell.types.HIT ||
+            targetCell.type === Cell.types.MISS;
+        // TODO: don't know how i'll handle this in UI yet, just throw for Jest validation
+        if (isBadShot)
             throw new Error(`You already fired at this spot ${point}`);
 
         // check for a hit
-        targetShot.type = Cell.types.MISS;
-        const targetCell = this.gridShips.cells[point.y][point.x];
+        let status = Cell.types.MISS;
         if (targetCell.type === Cell.types.SHIP) {
-            targetShot.type = Cell.types.HIT;
-            const { ship } = this.ships.get(getShipType(this.ships, point));
+            status = Cell.types.HIT;
+            const ship = getShipFromPoint(this.ships, point);
+            if (ship === null)
+                throw new Error("This is not supposed to happen");
             ship.hit();
 
             // TODO: probably need a hook here to report sunk ship
         }
+        targetCell.type = status;
 
-        return targetShot.type;
+        return status;
     },
 
-    // TODO: something needs to be refactored
-    // there are a bunch of steps required to place a ship, but 
-    // none of it is generic or repated code
+    // there are a bunch of steps required to place a ship, but none of it is generic or repated
     // a bunch of inner functions is realy no different from block comments
     placeShip(
         type = Ship.types.BATTLESHIP,
         tailPoint = { x: 0, y: 0 },
         direction = directions.NORTH
     ) {
-        const { ship, arrayOfPoints } = this.ships.get(type);
+        const { ship, arrayOfPoints } = getShipByType(this.ships, type);
         const newPoints = [];
 
         // prevent out of bounds
-        const xEnd = tailPoint.x + direction.x * (ship.type.length - 1);
-        const yEnd = tailPoint.y + direction.y * (ship.type.length - 1);
-        if (xEnd < 0 || xEnd > 9 || yEnd < 0 || yEnd > 9)
-            throw new Error("placeShip() fail. Ship would be out of bounds");
+        {
+            const xEnd = tailPoint.x + direction.x * (ship.type.length - 1);
+            const yEnd = tailPoint.y + direction.y * (ship.type.length - 1);
+            if (xEnd < 0 || xEnd > 9 || yEnd < 0 || yEnd > 9)
+                throw new Error(
+                    "placeShip() fail. Ship would be out of bounds"
+                );
+        }
 
         // build list of cordinats for the ship
-        newPoints.push({ x: tailPoint.x, y: tailPoint.y });
-        for (let i = 1; i < ship.type.length; i++)
-            newPoints.push({
-                x: tailPoint.x + direction.x * i,
-                y: tailPoint.y + direction.y * i,
-            });
+        {
+            newPoints.push({ x: tailPoint.x, y: tailPoint.y });
+            for (let i = 1; i < ship.type.length; i++)
+                newPoints.push({
+                    x: tailPoint.x + direction.x * i,
+                    y: tailPoint.y + direction.y * i,
+                });
+        }
 
-        // repositioning an existing ship
+        // erase ship's current location so it can reposition over itself
         // order of code is important
-        // need to clear current location so a ship can reposition over itself
-        if (arrayOfPoints.length > 0) {
-            arrayOfPoints.forEach((point) => {
-                const cell = this.gridShips.cells[point.y][point.x];
-                cell.type = Cell.types.WATER;
-            });
-            arrayOfPoints.length = 0;
+        // this has to be done before checking for existing ship
+        // i decided this is not a bug
+            // ship would be removed here, but could throw error in next block
+            // matches what you would phisicaly do in a real game
+        {
+            if (arrayOfPoints.length > 0) {
+                arrayOfPoints.forEach((point) => {
+                    const cell = this.gridShips.cells[point.y][point.x];
+                    cell.type = Cell.types.WATER;
+                });
+                arrayOfPoints.length = 0;
+            }
         }
 
         // check for existing ship at cords
-        const isWater = newPoints.every((point) => {
-            const cell = this.gridShips.cells[point.y][point.x];
-            return cell.type === Cell.types.WATER;
-        });
-        if (!isWater)
-            throw new Error(
-                "placeShip() fail. Cannot place ships on top of others"
-            );
+        {
+            const isWater = newPoints.every((point) => {
+                const cell = this.gridShips.cells[point.y][point.x];
+                return cell.type === Cell.types.WATER;
+            });
+            if (!isWater)
+                throw new Error(
+                    "placeShip() fail. Cannot place ships on top of others"
+                );
+        }
 
         // copy points into the ships map
         newPoints.forEach((point) => arrayOfPoints.push(point));
@@ -120,36 +137,40 @@ const proto = {
 function factory() {
     const obj = Object.create(proto);
 
-    // TODO: i'm using this wrong in receiveAttack()
-    // not sure what shots is suposed to record; i think it should be my shots
-    // against oponent and I should have hits and miss on from receiveAttack go to ship grid
+    // TODO: do something with shots grid
+    // i think it records my shots against oponent
     obj.gridShips = Grid.factory();
     obj.gridShots = Grid.factory();
 
-    // TODO: wiki said ships "may vary depending on the rules", kind of usless
-    // defaulting to 1 of each
-    // TODO: why am i using Map(), type is key and part of value, should probably use Set
+    // wiki said ships "may vary depending on the rules", kind of usless defaulting to 1 of each
+    // ships is just a container of the ship objects and the array of points the are positioned on the grid
     obj.ships = new Map();
     for (let type in Ship.types) {
         // I need a referance to the property, not it's name
         type = Ship.types[type];
-        obj.ships.set(type, { ship: Ship.factory(type), arrayOfPoints: [] });
+        // TODO: the array is arrayOfPoints, but i got rid of the object literal crap
+        obj.ships.set(Ship.factory(type), []);
     }
 
     return obj;
 }
 
-// TODO: i do hate this, but i hated Cell.shipTypeRef more
-// need to know what ship is on a cell when firing a shot
-// and when repositioning
-// upgrade from hack inapropriate referance to stupid search
-function getShipType(ships = new Map(), point = { x: 0, y: 0 }) {
-    for (const [key, value] of ships) {
-        const { arrayOfPoints } = value;
+// i do hate this, but i hated Cell.shipTypeRef more
+// need to know what ship is on a cell when firing a shot and when repositioning
+function getShipFromPoint(ships = new Map(), point = { x: 0, y: 0 }) {
+    for (const [ship, arrayOfPoints] of ships) {
         const isMatch = arrayOfPoints.some(
             (shipPoint) => shipPoint.x === point.x && shipPoint.y === point.y
         );
-        if (isMatch) return key;
+        if (isMatch) return ship;
+    }
+    return null;
+}
+
+// if i was in a real OOP language, these get() functions would be private methods of a class
+function getShipByType(ships = new Map(), type = Ship.types.BATTLESHIP) {
+    for (const [ship, arrayOfPoints] of ships) {
+        if (ship.type === type) return { ship, arrayOfPoints };
     }
     return null;
 }
@@ -169,11 +190,14 @@ function doStuff() {
     board.receiveAttack({ x: 4, y: 5 });
     // board.receiveAttack({ x: 4, y: 5 });
 
-    const { ship, arrayOfPoints } = board.ships.get(Ship.types.BATTLESHIP);
+    const { ship, arrayOfPoints } = getShipByType(
+        board.ships,
+        Ship.types.BATTLESHIP
+    );
     // console.log(arrayOfPoints);
     console.log(board.gridShips.toString());
     console.log("\n");
-    console.log(board.gridShots.toString());
+    //console.log(board.gridShots.toString());
 }
 
 // doStuff();
