@@ -23,9 +23,6 @@ const proto = {
     },
 };
 
-// TODO: need to figure out how to have the properties private
-// the ief closure thing with accesor methods on the prototype
-// just going to continue doing it wrong for now
 function factory(type) {
     const obj = Object.create(proto);
     obj.hits = 0;

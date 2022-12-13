@@ -15,6 +15,11 @@ const directions = {
 Object.freeze(directions);
 
 const proto = {
+    isLoser() {
+        let arr = Array.from(this.ships.keys());
+        return arr.every((ship) => ship.isSunk());
+    },
+
     recordShot(point = { x: 0, y: 0 }, type = Cell.types.MISS) {
         this.gridShots.cells[point.x][point.y].type = type;
     },
@@ -116,7 +121,7 @@ const proto = {
 
     toString() {
         let arr = Array.from(this.ships.keys());
-        arr = arr.map((element) => element.name);
+        arr = arr.map((ship) => ship.type.name);
 
         return (
             `Ships:\n${arr.join("\n")}` +
@@ -143,7 +148,7 @@ function factory() {
     obj.gridShots = Grid.factory();
 
     // wiki said ships "may vary depending on the rules", kind of usless defaulting to 1 of each
-    // ships Map is a container for the ship object and the array of points it occupies, 
+    // ships Map is a container for the ship object and the array of points it occupies,
     // array is populated when the ship is placed
     obj.ships = new Map();
     for (let type in Ship.types) {
@@ -182,21 +187,16 @@ function doStuff() {
     );
     console.log(isWater);
 
-    board.placeShip(Ship.types.BATTLESHIP, { x: 1, y: 1 }, directions.NORTH);
+    console.log(board.isLoser());
 
-    board.placeShip(Ship.types.BATTLESHIP, { x: 4, y: 5 }, directions.NORTH);
-    board.placeShip(Ship.types.DESTROYER, { x: 5, y: 5 }, directions.NORTH);
+    board.placeShip(Ship.types.BATTLESHIP, { x: 1, y: 1 }, directions.SOUTH);
+    board.placeShip(Ship.types.BATTLESHIP, { x: 4, y: 5 }, directions.SOUTH);
+    board.placeShip(Ship.types.DESTROYER, { x: 5, y: 5 }, directions.SOUTH);
     board.receiveAttack({ x: 4, y: 5 });
     // board.receiveAttack({ x: 4, y: 5 });
 
-    const { ship, arrayOfPoints } = getShipByType(
-        board.ships,
-        Ship.types.BATTLESHIP
-    );
-    // console.log(arrayOfPoints);
-    console.log(board.gridShips.toString());
-    console.log("\n");
-    //console.log(board.gridShots.toString());
+    board.recordShot({ x: 5, y: 5 }, Cell.types.MISS);
+    console.log(board.toString());
 }
 
 // doStuff();
