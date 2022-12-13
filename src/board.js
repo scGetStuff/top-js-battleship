@@ -4,22 +4,23 @@ import * as Grid from "./grid.js";
 import * as Cell from "./cell.js";
 import * as Ship from "./ship.js";
 
-// TODO: dependent on board orientation
-// need to change to folowing wiki 0,0 upper left 9,9 lower right
-// i realy don't want bacwards cordinats, need to play with it
-// change grid toString()
+// N/S are inverted because of board orientation: (0,0) upper left; (9,9) lower right
+// moving north meand lower on y axis
 const directions = {
-    NORTH: { x: 0, y: 1 },
-    SOUTH: { x: 0, y: -1 },
+    NORTH: { x: 0, y: -1 },
+    SOUTH: { x: 0, y: 1 },
     WEST: { x: -1, y: 0 },
     EAST: { x: 1, y: 0 },
 };
 Object.freeze(directions);
 
 const proto = {
-    //fix shot recording; add hit/miss to ship grid; add code to record my attacks on shot grid
+    recordShot(point = { x: 0, y: 0 }, type = Cell.types.MISS) {
+        this.gridShots.cells[point.x][point.y].type = type;
+    },
+
     receiveAttack(point = { x: 0, y: 0 }) {
-        const targetCell = this.gridShips.cells[point.y][point.x];
+        const targetCell = this.gridShips.cells[point.x][point.y];
 
         // if they repeat an existing shot
         const isBadShot =
@@ -79,12 +80,12 @@ const proto = {
         // order of code is important
         // this has to be done before checking for existing ship
         // i decided this is not a bug
-            // ship would be removed here, but could throw error in next block
-            // matches what you would phisicaly do in a real game
+        // ship would be removed here, but could throw error in next block
+        // matches what you would phisicaly do in a real game
         {
             if (arrayOfPoints.length > 0) {
                 arrayOfPoints.forEach((point) => {
-                    const cell = this.gridShips.cells[point.y][point.x];
+                    const cell = this.gridShips.cells[point.x][point.y];
                     cell.type = Cell.types.WATER;
                 });
                 arrayOfPoints.length = 0;
@@ -94,7 +95,7 @@ const proto = {
         // check for existing ship at cords
         {
             const isWater = newPoints.every((point) => {
-                const cell = this.gridShips.cells[point.y][point.x];
+                const cell = this.gridShips.cells[point.x][point.y];
                 return cell.type === Cell.types.WATER;
             });
             if (!isWater)
@@ -108,7 +109,7 @@ const proto = {
 
         // update grid with the ship
         arrayOfPoints.forEach((point) => {
-            const cell = this.gridShips.cells[point.y][point.x];
+            const cell = this.gridShips.cells[point.x][point.y];
             cell.type = Cell.types.SHIP;
         });
     },
@@ -124,7 +125,7 @@ const proto = {
         );
     },
 
-    // TODO: may not want to this, kind of just for testing
+    // TODO: may not want this, kind of just for testing
     defaultPlaceShips() {
         let i = 0;
         for (let type in Ship.types) {
@@ -137,26 +138,24 @@ const proto = {
 function factory() {
     const obj = Object.create(proto);
 
-    // TODO: do something with shots grid
-    // i think it records my shots against oponent
+    // TODO: do something with shots grid, should records my shots against oponent
     obj.gridShips = Grid.factory();
     obj.gridShots = Grid.factory();
 
     // wiki said ships "may vary depending on the rules", kind of usless defaulting to 1 of each
-    // ships is just a container of the ship objects and the array of points the are positioned on the grid
+    // ships Map is a container for the ship object and the array of points it occupies, 
+    // array is populated when the ship is placed
     obj.ships = new Map();
     for (let type in Ship.types) {
         // I need a referance to the property, not it's name
         type = Ship.types[type];
-        // TODO: the array is arrayOfPoints, but i got rid of the object literal crap
         obj.ships.set(Ship.factory(type), []);
     }
 
     return obj;
 }
 
-// i do hate this, but i hated Cell.shipTypeRef more
-// need to know what ship is on a cell when firing a shot and when repositioning
+// these get functions would be private in the prototype if that was a thing
 function getShipFromPoint(ships = new Map(), point = { x: 0, y: 0 }) {
     for (const [ship, arrayOfPoints] of ships) {
         const isMatch = arrayOfPoints.some(
@@ -166,8 +165,6 @@ function getShipFromPoint(ships = new Map(), point = { x: 0, y: 0 }) {
     }
     return null;
 }
-
-// if i was in a real OOP language, these get() functions would be private methods of a class
 function getShipByType(ships = new Map(), type = Ship.types.BATTLESHIP) {
     for (const [ship, arrayOfPoints] of ships) {
         if (ship.type === type) return { ship, arrayOfPoints };
@@ -184,6 +181,8 @@ function doStuff() {
         row.every((cell) => cell.type === Cell.types.WATER)
     );
     console.log(isWater);
+
+    board.placeShip(Ship.types.BATTLESHIP, { x: 1, y: 1 }, directions.NORTH);
 
     board.placeShip(Ship.types.BATTLESHIP, { x: 4, y: 5 }, directions.NORTH);
     board.placeShip(Ship.types.DESTROYER, { x: 5, y: 5 }, directions.NORTH);

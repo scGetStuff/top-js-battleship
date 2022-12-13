@@ -9,10 +9,10 @@ const proto = {
         const out = [];
         let line;
 
-        for (let r = SIZE-1; r >= 0; r--) {
+        for (let y = 0; y < SIZE; y++) {
             line = "";
-            for (let c = 0; c < SIZE; c++) {
-                line += this.cells[r][c] + "  ";
+            for (let x = 0; x < SIZE; x++) {
+                line += this.cells[x][y] + "  ";
             }
             out.push(line.trimEnd());
         }
@@ -26,10 +26,12 @@ function factory() {
     const obj = Object.create(proto);
 
     const cells = new Array(SIZE);
-    for (let r = 0; r < SIZE; r++) {
-        cells[r] = new Array(SIZE);
-        for (let c = 0; c < SIZE; c++) cells[r][c] = Cell.factory(c, r);
+    for (let x = 0; x < SIZE; x++) {
+        cells[x] = new Array(SIZE);
+        for (let y = 0; y < SIZE; y++) cells[x][y] = Cell.factory(x, y);
     }
+    // TODO: i hate that i access this directly outside of this module
+    // need private stuff, real language features
     obj.cells = cells;
 
     return obj;

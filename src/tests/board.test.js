@@ -36,7 +36,7 @@ test("test placeShip() out of bounds", () => {
         board.placeShip(
             Ship.types.BATTLESHIP,
             { x: 1, y: 1 },
-            Board.directions.SOUTH
+            Board.directions.NORTH
         )
     ).toThrow();
 

@@ -8,9 +8,10 @@ The Odin Project, Full Stack JavaScript Path, JavaScript, Testing JavaScript, Pr
 -   Using factory functions for this project.
 
 TODO
-- I probably don't have enough tests, I am not getting into TDD unless somebody id paying me
+- I probably don't have enough tests, I am not getting into TDD unless somebody is paying me
 - board needs report method to return if all ships sunk; for game loop to call
-- player object; will be random AI first
+- create player module; record hit/miss on shot grid of the players board
+- AI will be random first
 - game loop
 - add ability to place ships; start with static
 - UI
