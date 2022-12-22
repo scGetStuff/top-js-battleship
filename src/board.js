@@ -26,6 +26,8 @@ const proto = {
 
     receiveAttack(point = { x: 0, y: 0 }) {
         const targetCell = this.gridShips.cells[point.x][point.y];
+        let status = Cell.types.MISS;
+        let sunkShipType = null;
 
         // if they repeat an existing shot
         const isBadShot =
@@ -36,7 +38,6 @@ const proto = {
             throw new Error(`You already fired at this spot ${point}`);
 
         // check for a hit
-        let status = Cell.types.MISS;
         if (targetCell.type === Cell.types.SHIP) {
             status = Cell.types.HIT;
             const ship = getShipFromPoint(this.ships, point);
@@ -44,11 +45,12 @@ const proto = {
                 throw new Error("This is not supposed to happen");
             ship.hit();
 
-            // TODO: probably need a hook here to report sunk ship
+            // notify attacker that they sunk a ship
+            if (ship.isSunk()) sunkShipType = ship.type;
         }
         targetCell.type = status;
 
-        return status;
+        return { status, sunkShipType };
     },
 
     // there are a bunch of steps required to place a ship, but none of it is generic or repated
@@ -73,8 +75,7 @@ const proto = {
 
         // build list of cordinats for the ship
         {
-            newPoints.push({ x: tailPoint.x, y: tailPoint.y });
-            for (let i = 1; i < ship.type.length; i++)
+            for (let i = 0; i < ship.type.length; i++)
                 newPoints.push({
                     x: tailPoint.x + direction.x * i,
                     y: tailPoint.y + direction.y * i,
@@ -180,23 +181,50 @@ function getShipByType(ships = new Map(), type = Ship.types.BATTLESHIP) {
 export { factory, directions };
 
 function doStuff() {
-    const board = factory();
+    {
+        const board = factory();
+        console.log(board.isLoser());
+    }
 
-    const isWater = board.gridShips.cells.every((row) =>
-        row.every((cell) => cell.type === Cell.types.WATER)
-    );
-    console.log(isWater);
+    {
+        const board = factory();
+        const isWater = board.gridShips.cells.every((row) =>
+            row.every((cell) => cell.type === Cell.types.WATER)
+        );
+        console.log(isWater);
+    }
 
-    console.log(board.isLoser());
+    {
+        const board = factory();
+        board.placeShip(
+            Ship.types.BATTLESHIP,
+            { x: 1, y: 1 },
+            directions.SOUTH
+        );
+        board.placeShip(
+            Ship.types.BATTLESHIP,
+            { x: 4, y: 5 },
+            directions.SOUTH
+        );
+        board.placeShip(Ship.types.DESTROYER, { x: 5, y: 5 }, directions.SOUTH);
+        board.receiveAttack({ x: 4, y: 5 });
+        // board.receiveAttack({ x: 4, y: 5 });
 
-    board.placeShip(Ship.types.BATTLESHIP, { x: 1, y: 1 }, directions.SOUTH);
-    board.placeShip(Ship.types.BATTLESHIP, { x: 4, y: 5 }, directions.SOUTH);
-    board.placeShip(Ship.types.DESTROYER, { x: 5, y: 5 }, directions.SOUTH);
-    board.receiveAttack({ x: 4, y: 5 });
-    // board.receiveAttack({ x: 4, y: 5 });
+        board.recordShot({ x: 5, y: 5 }, Cell.types.MISS);
+    }
 
-    board.recordShot({ x: 5, y: 5 }, Cell.types.MISS);
-    console.log(board.toString());
+    {
+        const board = factory();
+        board.placeShip(
+            Ship.types.PATROLBOAT,
+            { x: 0, y: 1 },
+            directions.NORTH
+        );
+        let { status, sunkShipType } = board.receiveAttack({ x: 0, y: 0 });
+        console.table({ status, sunkShipType });
+        ({ status, sunkShipType } = board.receiveAttack({ x: 0, y: 1 }));
+        console.table({ status, sunkShipType });
+    }
 }
 
 // doStuff();

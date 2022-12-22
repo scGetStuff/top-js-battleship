@@ -47,11 +47,23 @@ test("test placeShip() out of bounds", () => {
             Board.directions.WEST
         )
     ).toThrow();
-
 });
 
 test("test receiveAttack()", () => {
     const board = Board.factory();
-    expect(board.receiveAttack({ x: 4, y: 5 })).toEqual(Cell.types.MISS);
+    let { status, sunkShipType } = board.receiveAttack({ x: 4, y: 5 });
+    expect(status).toEqual(Cell.types.MISS);
     expect(() => board.receiveAttack({ x: 4, y: 5 })).toThrow();
+
+    board.placeShip(
+        Ship.types.PATROLBOAT,
+        { x: 0, y: 1 },
+        Board.directions.NORTH
+    );
+    ({ status, sunkShipType } = board.receiveAttack({ x: 0, y: 0 }));
+    expect(status).toEqual(Cell.types.HIT);
+    expect(sunkShipType).toEqual(null);
+    ({ status, sunkShipType } = board.receiveAttack({ x: 0, y: 1 }));
+    expect(status).toEqual(Cell.types.HIT);
+    expect(sunkShipType).toEqual(Ship.types.PATROLBOAT);
 });
