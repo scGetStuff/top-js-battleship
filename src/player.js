@@ -7,9 +7,9 @@ import * as Board from "./board.js";
 
 const proto = {
     // there is nothing to test for this, its just glue
-    launchAttack(point = { x: 0, y: 0 }, enemyBoard) {
-        const { status, sunkShipType } = enemyBoard.receiveAttack(point);
-        this.board.recordShot(status);
+    launchAttack(point = { x: 0, y: 0 }, enemy) {
+        const { status, sunkShipType } = enemy.board.receiveAttack(point);
+        this.board.recordShot(point);
         return { status, sunkShipType };
     },
 

@@ -5,6 +5,13 @@ import * as Cell from "./cell.js";
 const SIZE = 10;
 
 const proto = {
+    // TODO: for testing a thing
+    setAll(type = Cell.types.HIT) {
+        for (let x = 0; x < SIZE; x++) {
+            for (let y = 0; y < SIZE; y++) this.cells[x][y].type = type;
+        }
+    },
+
     toString() {
         const out = [];
         let line;
@@ -37,7 +44,7 @@ function factory() {
     return obj;
 }
 
-export { factory };
+export { factory, SIZE };
 
 function doStuff() {
     const grid = factory();

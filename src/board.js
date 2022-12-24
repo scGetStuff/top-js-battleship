@@ -42,7 +42,7 @@ const proto = {
             status = Cell.types.HIT;
             const ship = getShipFromPoint(this.ships, point);
             if (ship === null)
-                throw new Error("This is not supposed to happen");
+                throw new Error("receiveAttack() : This is not supposed to happen");
             ship.hit();
 
             // notify attacker that they sunk a ship
@@ -136,7 +136,7 @@ const proto = {
         let i = 0;
         for (let type in Ship.types) {
             type = Ship.types[type];
-            this.placeShip(type, { x: i++, y: 1 }, directions.NORTH);
+            this.placeShip(type, { x: i++, y: 1 }, directions.SOUTH);
         }
     },
 };
@@ -181,6 +181,14 @@ function getShipByType(ships = new Map(), type = Ship.types.BATTLESHIP) {
 export { factory, directions };
 
 function doStuff() {
+    {
+        const board = factory();
+        board.defaultPlaceShips();
+        console.log(board.toString());
+    }
+
+    return;
+
     {
         const board = factory();
         console.log(board.isLoser());
