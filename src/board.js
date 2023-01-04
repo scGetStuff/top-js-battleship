@@ -144,7 +144,6 @@ const proto = {
 function factory() {
     const obj = Object.create(proto);
 
-    // TODO: do something with shots grid, should records my shots against oponent
     obj.gridShips = Grid.factory();
     obj.gridShots = Grid.factory();
 

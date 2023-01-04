@@ -11,25 +11,19 @@ test("Create board", () => {
     expect(board.ships).toBeDefined();
 });
 
-test("test placeShip() on empty board", () => {
+test("placeShip() on empty board", () => {
     const board = Board.factory();
 
-    expect(isWater()).toBe(true);
+    expect(isWater(board)).toBe(true);
     board.placeShip(
         Ship.types.BATTLESHIP,
         { x: 4, y: 5 },
         Board.directions.NORTH
     );
-    expect(isWater()).toBe(false);
-
-    function isWater() {
-        return board.gridShips.cells.every((row) =>
-            row.every((cell) => cell.type === Cell.types.WATER)
-        );
-    }
+    expect(isWater(board)).toBe(false);
 });
 
-test("test placeShip() out of bounds", () => {
+test("placeShip() out of bounds", () => {
     const board = Board.factory();
 
     expect(() =>
@@ -67,3 +61,16 @@ test("test receiveAttack()", () => {
     expect(status).toEqual(Cell.types.HIT);
     expect(sunkShipType).toEqual(Ship.types.PATROLBOAT);
 });
+
+test("isLoser()", () => {
+    const board = Board.factory();
+    expect(board.isLoser()).toBe(false);
+    // TODO: sink all ships and test true
+});
+
+
+function isWater(board) {
+    return board.gridShips.cells.every((row) =>
+        row.every((cell) => cell.type === Cell.types.WATER)
+    );
+}

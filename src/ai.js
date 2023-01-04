@@ -4,10 +4,6 @@ import * as Cell from "./cell.js";
 import * as Grid from "./grid.js";
 import * as Player from "./player.js";
 
-function placeShips(player) {
-    player.board.defaultPlaceShips();
-}
-
 // TODO: first draft
 // ignore errors and try again, incase random selects a cell already shot
 // don't want infinite loop, so limit
@@ -46,4 +42,4 @@ function randomNum() {
     return Math.floor(Math.random() * Grid.SIZE);
 }
 
-export { placeShips, doTurn };
+export { doTurn };
