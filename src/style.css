@@ -1,0 +1,48 @@
+:root {
+    --clr-primary: rgb(20, 20, 20);
+    --clr-secondary: rgb(30, 30, 30);
+    --clr-txt: rgb(235, 235, 235);
+}
+
+html {
+    box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: inherit;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    height: 100vh;
+    min-height: 100vh;
+}
+
+body {
+    background-color: var(--clr-primary);
+    color: var(--clr-txt);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.board {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1rem;
+    border: 5px solid black;
+}
+
+.grid {
+    /* TODO: aproximate grid size; real size will come from js code */
+    width: 40vh;
+    height: 40vh;
+    background-color: aquamarine;
+}
