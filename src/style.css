@@ -25,24 +25,31 @@ body {
 body {
     background-color: var(--clr-primary);
     color: var(--clr-txt);
+
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     align-items: center;
 }
 
+h1 {
+    padding: 0.5rem;
+}
+
 .board {
-    flex: 1;
+    background-color: var(--clr-secondary);
+    padding: 1rem;
+
     display: flex;
     flex-direction: column;
-    justify-content: center;
     gap: 1rem;
-    border: 5px solid black;
+    outline: 2px solid black;
 }
 
 .grid {
-    /* TODO: aproximate grid size; real size will come from js code */
-    width: 40vh;
-    height: 40vh;
+    color: var(--clr-primary);
+    outline: 2px solid red;
     background-color: aquamarine;
+    /* TODO: aproximate grid size; real size will come from js code */
+    width: 42vh;
+    aspect-ratio: 1 / 1;
 }
